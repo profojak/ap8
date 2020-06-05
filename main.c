@@ -14,10 +14,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mzapo/mzapo_phys.h"
+#include "mzapo/mzapo_parlcd.h"
 #include "mzapo/mzapo_regs.h"
 #include "utils/lcd.h"
 #include "utils/led.h"
@@ -29,26 +29,27 @@ int main(int argc, char *argv[])
     SPILED_REG_BASE_PHYS, SPILED_REG_SIZE, 0);
   unsigned char *lcd_mem_base = (unsigned char *)map_phys_address(
     PARLCD_REG_BASE_PHYS, PARLCD_REG_SIZE, 0);
-  unsigned char *serv_mem_base = (unsigned char *)map_phys_address(
+  unsigned char *servo_mem_base = (unsigned char *)map_phys_address(
     SERVOPS2_REG_BASE_PHYS, SERVOPS2_REG_SIZE, 0);
   unsigned char *audio_mem_base = (unsigned char *)map_phys_address(
     AUDIOPWM_REG_BASE_PHYS, AUDIOPWM_REG_SIZE, 0);
 
-  // reset device
+  // init device
   lcd_init(lcd_mem_base);
-  led_line_set(0x0,led_mem_base);
+  led_line_set(led_mem_base, 0x0);
+  led_rgb_set(led_mem_base, "000");
+  led_servo_set(servo_mem_base, 0x0);
+  fbuffer_t *fb = fb_init(WIDTH * HEIGHT);
 
-  // frame buffer
-  fbuffer_t *fb = (fbuffer_t *)malloc(sizeof(fbuffer_t));
-  fb->w = WIDTH;
-  fb->h = HEIGHT;
-  fb->r = (unsigned char *)malloc(WIDTH * HEIGHT);
-  fb->g = (unsigned char *)malloc(WIDTH * HEIGHT);
-  fb->b = (unsigned char *)malloc(WIDTH * HEIGHT);
+  lcd_test(lcd_mem_base, fb);
+  led_line_test(led_mem_base);
+  led_rgb_test(led_mem_base);
+  led_servo_test(servo_mem_base);
 
-  *(volatile uint32_t *)(serv_mem_base + SERVOPS2_REG_CR_o) = 0x0;
-  *(volatile uint32_t *)(led_mem_base + SPILED_REG_LED_RGB1_o) = 0x000000;
-  *(volatile uint32_t *)(led_mem_base + SPILED_REG_LED_RGB2_o) = 0x000000;
+  free(fb->r);
+  free(fb->g);
+  free(fb->b);
+  free(fb);
 
   return 0;
 }
