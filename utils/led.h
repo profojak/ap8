@@ -7,6 +7,9 @@
 
 #include <stdint.h>
 
+#include "../mzapo/mzapo_regs.h"
+#include "../mzapo/mzapo_parlcd.h"
+
 void led_line_set(unsigned char *led_mem_base, short leds);
 
 void led_rgb_set(unsigned char *led_mem_base, char *rgb);

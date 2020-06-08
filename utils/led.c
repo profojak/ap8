@@ -8,8 +8,6 @@
 #include <stdlib.h>
 
 #include "led.h"
-#include "../mzapo/mzapo_regs.h"
-#include "../mzapo/mzapo_parlcd.h"
 
 /* set LEDs on 32 LED line */
 void led_line_set(unsigned char *led_mem_base, short leds)
