@@ -42,19 +42,45 @@ int main(int argc, char *argv[])
   led_servo_set(servo_mem_base, 0x0);
   fbuffer_t *fb = fb_init(WIDTH, HEIGHT);
 
-  /*
-  lcd_test(lcd_mem_base, fb);
+  int size = 20*sizeof(int);
+  int *array = malloc(size); 
+  int count = 0;
+  
+  while(1){
+	if (count%20 == 0 && count != 0){size += 20*sizeof(int); array = realloc(array,size);}
+    int block;
+    scanf("%d",&block);
+    if(block == -1){break;}
+    int line;
+    scanf("%d", &line);
+    array[count] = block;
+    array[count+1] = line;
+    fb_block(block, line, 0, "009",fb);
+    lcd_draw(lcd_mem_base, fb);
+    count += 2; 
+    //parlcd_delay(10);
+  }
+  
+  lcd_init(lcd_mem_base, WIDTH * HEIGHT);
+  fb_fill(0,0,WIDTH, HEIGHT,"000",fb);
+  
+  for (int i = 0; i < count; i += 2){
+	//printf("%d %d", array[i], array[i+1]);
+    fb_block(array[i], array[i+1], 0, "009",fb);
+    lcd_draw(lcd_mem_base, fb);
+    parlcd_delay(100);  
+  }
+  
+  /*lcd_test(lcd_mem_base, fb);
   led_line_test(led_mem_base);
   led_rgb_test(led_mem_base);
-  led_servo_test(servo_mem_base);
-  */
-
-  /*
-  menu_t *menu = menu2_init("Continue", "Exit");
+  led_servo_test(servo_mem_base);*/
+  
+  /*menu_t *menu = menu2_init("Continue", "Exit");
   fb_menu2(menu, "808", fb);
-  lcd_draw(lcd_mem_base, fb);
-  */
-
+  lcd_draw(lcd_mem_base, fb);*/
+  
+  free(array);
   free(fb->r);
   free(fb->g);
   free(fb->b);

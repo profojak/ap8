@@ -150,7 +150,7 @@ void lcd_draw(unsigned char *lcd_mem_base, fbuffer_t *fb)
 /* LCD color test */
 void lcd_test(unsigned char *lcd_mem_base, fbuffer_t *fb)
 {
-  // green
+  // orange
   fb_block(0, 0, 0, "f00", fb);
   fb_block(0, 1, 0, "e00", fb);
   fb_block(0, 2, 0, "d00", fb);
