@@ -10,10 +10,10 @@
 #include "led.h"
 
 /* set LEDs on 32 LED line */
-void led_line_set(unsigned char *led_mem_base, short leds)
+void led_line_set(unsigned char *led_mem_base, int leds)
 {
   int i;
-  unsigned short mask = 1;
+  unsigned int mask = 1;
   uint32_t line = 0, set = 0x0000003e;
   for (i = 0; i < 6; i++) {
     if (leds & (mask << i)) {
@@ -36,13 +36,6 @@ void led_rgb_set(unsigned char *led_mem_base, char *rgb)
   *(volatile uint32_t *)(led_mem_base + SPILED_REG_LED_RGB2_o) = c;
 }
 
-/* servo LEDs set */
-void led_servo_set(unsigned char *servo_mem_base, short num)
-{
-  uint32_t c = num > 0 ? 0x1 << (num - 1) : 0;
-  *(volatile uint32_t *)(servo_mem_base + SERVOPS2_REG_CR_o) = c;
-}
-
 /* test 32 LED line */
 void led_line_test(unsigned char *led_mem_base) {
   int i;
@@ -55,6 +48,37 @@ void led_line_test(unsigned char *led_mem_base) {
     *(volatile uint32_t *)(led_mem_base + SPILED_REG_LED_LINE_o) = line;
     parlcd_delay(30);
   }
+
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x0);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x1);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x2);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x4);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x8);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x10);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x20);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x1 + 0x4);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x2 + 0x8);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x4 + 0x10);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x8 + 0x20);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x1 + 0x4 + 0x10);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x2 + 0x8 + 0x20);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x1 + 0x2 + 0x4 + 0x8 + 0x10 + 0x20);
+  parlcd_delay(200);
+  led_line_set(led_mem_base, 0x0);
 }
 
 /* test color LEDs */
@@ -85,17 +109,4 @@ void led_rgb_test(unsigned char *led_mem_base)
     parlcd_delay(40);
     rgb[2]--;
   }
-}
-
-/* test servo LEDs */
-void led_servo_test(unsigned char *servo_mem_base)
-{
-  int i, j;
-  for (i = 0; i < 4; i++) {
-    for (j = 4; j > 0; j--) {
-      led_servo_set(servo_mem_base, j);
-      parlcd_delay(150);
-    }
-  }
-  led_servo_set(servo_mem_base, 0);
 }

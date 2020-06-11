@@ -11,10 +11,13 @@
 
 typedef struct {
   char **options;
+  char *rgb;
   short size;
   short active;
 } menu_t;
 
-menu_t *menu2_init(char *text1, char *text2);
+menu_t *menu2_init(char *text1, char *text2, char *rgb);
+
+menu_t *menu1_init(char *text, char *rgb);
 
 #endif /*MENU_H*/

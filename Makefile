@@ -8,8 +8,8 @@ LDFLAGS = -lrt -lpthread
 
 SOURCES = main.c mzapo/mzapo_phys.c mzapo/mzapo_parlcd.c
 SOURCES += fonts/font_prop14x16.c fonts/font_rom8x16.c
-SOURCES += utils/lcd.c utils/led.c
-SOURCES += gui/menu.c
+SOURCES += utils/lcd.c utils/led.c utils/servo.c
+SOURCES += gui/fbuffer.c gui/menu.c
 TARGET_EXE = ap8
 
 ifeq ($(TARGET_IP)$(filter run,$(MAKECMDGOALS)),run)
