@@ -56,15 +56,15 @@ char COLOR[8][3] = {
 int get_input(char input)
 {
   switch (input) {
-  case 'l': return LEFT;
-  case 'r': return RIGHT;
-  case 'u': return UP;
-  case 'd': return DOWN;
-  case 'x': return X;
-  case 'e': return ESC;
-  case 's': return S;
-  case 'p': return P;
-  case 'b': return B;
+  case 'l': case 'L': return LEFT;
+  case 'r': case 'R': return RIGHT;
+  case 'u': case 'U': return UP;
+  case 'd': case 'D': return DOWN;
+  case 'x': case 'X': return X;
+  case 'e': case 'E': return ESC;
+  case 's': case 'S': return S;
+  case 'p': case 'P': return P;
+  case 'b': case 'B': return B;
   case '-': return MINUS;
   case '+': return PLUS;
   default: return -1;
