@@ -38,6 +38,41 @@ void lcd_draw(unsigned char *lcd_mem_base, fbuffer_t *fb)
   }
 }
 
+/* splash screen */
+void lcd_splash(unsigned char *lcd_mem_base, fbuffer_t *fb)
+{
+  // logo
+  fb_text14x16(fb->w / 2 + 20 - 80, fb->h / 2 + 20 - 150, "ap",
+    10, "880", fb);
+  fb_text14x16(fb->w / 2 + 10 - 80, fb->h / 2 + 10 - 150, "ap",
+    10, "bb0", fb);
+  fb_text14x16(fb->w / 2 - 80, fb->h / 2 - 150, "ap",
+    10, "ff0", fb);
+  fb_text14x16(fb->w / 2 + 20 + 50, fb->h / 2 + 20 - 170, "8",
+    16, "803", fb);
+  fb_text14x16(fb->w / 2 + 10 + 50, fb->h / 2 + 10 - 170, "8",
+    16, "b05", fb);
+  fb_text14x16(fb->w / 2 + 50, fb->h / 2 - 170, "8",
+    16, "f07", fb);
+  lcd_draw(lcd_mem_base, fb);
+  parlcd_delay(2000);
+  // ap8 name
+  fb_text14x16(fb->w / 2, fb->h - 90, "actually perfect 8bit",
+    3, "fff", fb);
+  lcd_draw(lcd_mem_base, fb);
+  parlcd_delay(2000);
+  // enjoy text
+  fb_fill(0, 0, fb->w, fb->h, "000", fb);
+  fb_text14x16(fb->w / 2, fb->h / 2, "Enjoy! :)",
+    4, "fff", fb);
+  lcd_draw(lcd_mem_base, fb);
+  parlcd_delay(1000);
+  // grid with cursor
+  fb_fill(0, 0, fb->w, fb->h, "000", fb);
+  fb_block(0, 0, 1, "fff", fb);
+  lcd_draw(lcd_mem_base, fb);
+}
+
 /* LCD color test */
 void lcd_test(unsigned char *lcd_mem_base, fbuffer_t *fb)
 {

@@ -18,6 +18,8 @@ void lcd_init(unsigned char *lcd_mem_base, unsigned int size);
 
 void lcd_draw(unsigned char *lcd_mem_base, fbuffer_t *fb);
 
+void lcd_splash(unsigned char *lcd_mem_base, fbuffer_t *fb);
+
 void lcd_test(unsigned char *lcd_mem_base, fbuffer_t *fb);
 
 #endif /*LCD_H*/

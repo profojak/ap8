@@ -86,6 +86,8 @@ void led_rgb_test(unsigned char *led_mem_base)
 {
   int i;
   char rgb[3] = "f00";
+
+  // red
   for (i = 0; i < 15; i++) {
     led_rgb_set(led_mem_base, rgb);
     parlcd_delay(40);
@@ -93,6 +95,7 @@ void led_rgb_test(unsigned char *led_mem_base)
   }
   parlcd_delay(300);
 
+  // green
   rgb[0] = '0';
   rgb[1] = 'f';
   for (i = 0; i < 15; i++) {
@@ -102,6 +105,7 @@ void led_rgb_test(unsigned char *led_mem_base)
   }
   parlcd_delay(300);
 
+  // blue
   rgb[1] = '0';
   rgb[2] = 'f';
   for (i = 0; i < 15; i++) {

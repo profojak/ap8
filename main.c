@@ -117,6 +117,57 @@ void set_light(char c)
   }
 }
 
+/* close menu */
+void menu_close(menu_t *menu, char *grid, int grid_page,
+  int grid_active, int *STATE, fbuffer_t *fb)
+{
+  free(menu);
+  menu = NULL;
+  fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
+  set_grid(grid, grid_page, fb);
+  fb_block(grid_active % BLKW, grid_active / BLKW, 1,
+    COLOR[WHITE], fb);
+  *STATE = CREATE;
+}
+
+/* increase active grid index */
+void index_increase(char *grid, int *grid_active, int *grid_page,
+  int val, fbuffer_t *fb)
+{
+  set_block(grid, *grid_active, *grid_page, fb);
+  (*grid_active) -= val;
+  if ((*grid_active) < 0) {
+    (*grid_active) += BLKW * BLKH;
+    (*grid_page)--;
+    if ((*grid_page) < 0) {
+      *grid_page = 0;
+    }
+    set_grid(grid, *grid_page, fb);
+  }
+  fb_block((*grid_active) % BLKW, (*grid_active) / BLKW, 1,
+    COLOR[WHITE], fb);
+}
+
+/* decrease active grid index */
+int index_decrease(char *grid, int *grid_active, int *grid_page,
+  int grid_size, int val, fbuffer_t *fb)
+{
+  int ret = 0;
+  set_block(grid, *grid_active, *grid_page, fb);
+  (*grid_active) += val;
+  if ((*grid_active) >= BLKW * BLKH) {
+    (*grid_active) = (*grid_active) % (BLKW * BLKH);
+    (*grid_page)++;
+    if (((*grid_page) + 1) * BLKW * BLKH == grid_size) {
+      ret = 1;
+    }
+    set_grid(grid, *grid_page, fb);
+  }
+  fb_block((*grid_active) % BLKW, (*grid_active) / BLKW, 1,
+    COLOR[WHITE], fb);
+  return ret;
+}
+
 /* play created song */
 void play(unsigned char *led_mem_base, unsigned char *lcd_mem_base,
   char *grid, int low, int speed, fbuffer_t *fb)
@@ -157,14 +208,14 @@ void play(unsigned char *led_mem_base, unsigned char *lcd_mem_base,
         lcd_draw(lcd_mem_base, fb);
       }
 
-      parlcd_delay(speed + 1 * 10);
+      parlcd_delay(speed * 10);
     }
   }
   led_rgb_set(led_mem_base, COLOR[BLACK]);
   led_line_set(led_mem_base, 0);
 }
 
-/* check if all desk components work */
+/* check if all mzapo kit components work */
 void test(unsigned char *led_mem_base, unsigned char *lcd_mem_base,
   unsigned char *servo_mem_base, fbuffer_t *fb)
 {
@@ -197,40 +248,14 @@ int main(int argc, char *argv[])
   //return 0;
 
   // init variables
-  int grid_size = BLKW * BLKH, grid_active = 0, grid_page = 0,
+  int grid_size = 2 * BLKW * BLKH, grid_active = 0, grid_page = 0,
     low = 0, ret, speed, RUN = 1, STATE = CREATE;
   char *grid = malloc(grid_size), input;
   memset(grid, 0, grid_size);
   menu_t *menu = NULL;
   speed = 2 - knob_val(led_mem_base, 'g');
 
-  // splash screen
-  fb_text14x16(fb->w / 2 + 20 - 80, fb->h / 2 + 20 - 150, "ap",
-    10, "880", fb);
-  fb_text14x16(fb->w / 2 + 10 - 80, fb->h / 2 + 10 - 150, "ap",
-    10, "bb0", fb);
-  fb_text14x16(fb->w / 2 - 80, fb->h / 2 - 150, "ap",
-    10, "ff0", fb);
-  fb_text14x16(fb->w / 2 + 20 + 50, fb->h / 2 + 20 - 170, "8",
-    16, "803", fb);
-  fb_text14x16(fb->w / 2 + 10 + 50, fb->h / 2 + 10 - 170, "8",
-    16, "b05", fb);
-  fb_text14x16(fb->w / 2 + 50, fb->h / 2 - 170, "8",
-    16, "f07", fb);
-  lcd_draw(lcd_mem_base, fb);
-  parlcd_delay(2000);
-  fb_text14x16(fb->w / 2, fb->h - 90, "actually perfect 8bit",
-    3, COLOR[WHITE], fb);
-  lcd_draw(lcd_mem_base, fb);
-  parlcd_delay(2000);
-  fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-  fb_text14x16(fb->w / 2, fb->h / 2, "Enjoy! :)",
-    4, COLOR[WHITE], fb);
-  lcd_draw(lcd_mem_base, fb);
-  parlcd_delay(1000);
-  fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-  fb_block(0, 0, 1, COLOR[WHITE], fb);
-  lcd_draw(lcd_mem_base, fb);
+  lcd_splash(lcd_mem_base, fb);
 
   // main loop
   while (RUN) {
@@ -241,63 +266,25 @@ int main(int argc, char *argv[])
     // creating song
     case CREATE:
       switch (get_input(input)) {
-      case RIGHT: // right
-        set_block(grid, grid_active, grid_page, fb);
-        grid_active++;
-        if (grid_active >= BLKW * BLKH) {
-          grid_active = grid_active % (BLKW * BLKH);
+      case RIGHT: // move cursor to the right
+        if (index_decrease(grid, &grid_active, &grid_page,
+          grid_size, 1, fb)) {
           grid_size += BLKW * BLKH;
-          grid_page++;
-          if ((grid_page + 1) * BLKW * BLKH == grid_size) {
-            grid = grid_realloc(grid, grid_size);
-          }
-          set_grid(grid, grid_page, fb);
+          grid = grid_realloc(grid, grid_size);
         }
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
         break;
-      case LEFT: // left
-        set_block(grid, grid_active, grid_page, fb);
-        grid_active--;
-        if (grid_active < 0) {
-          grid_active += BLKW * BLKH;
-          grid_page--;
-          if (grid_page < 0) {
-            grid_page = 0;
-          }
-          set_grid(grid, grid_page, fb);
-        }
-        fb_block(grid_active % BLKW, (grid_active % (BLKW * BLKH))
-          / BLKW, 1, COLOR[WHITE], fb);
+      case LEFT: // move cursor to the left
+        index_increase(grid, &grid_active, &grid_page, 1, fb);
         break;
-      case UP: // up
-        set_block(grid, grid_active, grid_page, fb);
-        grid_active -= 6;
-        if (grid_active < 0) {
-          grid_active += BLKW * BLKH;
-          grid_page--;
-          if (grid_page < 0) {
-            grid_page = 0;
-          }
-          set_grid(grid, grid_page, fb);
-        }
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
+      case UP: // move cursor up
+        index_increase(grid, &grid_active, &grid_page, 6, fb);
         break;
-      case DOWN: // down
-        set_block(grid, grid_active, grid_page, fb);
-        grid_active += 6;
-        if (grid_active >= BLKW * BLKH) {
-          grid_active = grid_active % (BLKW * BLKH);
+      case DOWN: // move cursor down
+        if (index_decrease(grid, &grid_active, &grid_page,
+          grid_size, 6, fb)) {
           grid_size += BLKW * BLKH;
-          grid_page++;
-          if ((grid_page + 1) * BLKW * BLKH == grid_size) {
-            grid = grid_realloc(grid, grid_size);
-          }
-          set_grid(grid, grid_page, fb);
+          grid = grid_realloc(grid, grid_size);
         }
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
         break;
       case X: // place block
         if(grid[grid_active + grid_page * BLKW * BLKH]) {
@@ -310,24 +297,24 @@ int main(int argc, char *argv[])
         fb_block(grid_active % BLKW, grid_active / BLKW, 1,
           COLOR[WHITE], fb);
         break;
-      case ESC: // exit menu
+      case ESC: // open exit menu
         menu = menu2_init("Cancel", "Exit", COLOR[RED]);
         fb_menu2(menu, fb);
         STATE = EXIT;
         break;
-      case B: // brightness menu
+      case B: // open brightness menu
         menu = menu1_init("Backlight", COLOR[BLUE]);
         menu->active = knob_val(led_mem_base, 'b');
         fb_menu1(menu, fb);
         STATE = BACKLIGHT;
         break;
-      case S: // speed menu
+      case S: // open speed menu
         menu = menu1_init("Speed", COLOR[GREEN]);
         menu->active = knob_val(led_mem_base, 'g');
         fb_menu1(menu, fb);
         STATE = SPEED;
         break;
-      case P: // play menu
+      case P: // open play menu
         menu = menu2_init("Cancel", "Play", COLOR[WHITE]);
         fb_menu2(menu, fb);
         STATE = PLAY;
@@ -357,13 +344,7 @@ int main(int argc, char *argv[])
         break;
       case X: // select
         if (menu->active == 0) {
-          free(menu);
-          menu = NULL;
-          fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-          set_grid(grid, grid_page, fb);
-          fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-            COLOR[WHITE], fb);
-          STATE = CREATE;
+          menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
           break;
         } else {
           free(menu);
@@ -372,13 +353,7 @@ int main(int argc, char *argv[])
         }
         break;
       case ESC: // close menu
-        free(menu);
-        menu = NULL;
-        fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-        set_grid(grid, grid_page, fb);
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
-        STATE = CREATE;
+        menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
         break;
       default:
         continue;
@@ -402,13 +377,7 @@ int main(int argc, char *argv[])
         fb_menu1(menu, fb);
         break;
       case ESC: // close menu
-        free(menu);
-        menu = NULL;
-        fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-        set_grid(grid, grid_page, fb);
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
-        STATE = CREATE;
+        menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
         break;
       default:
         continue;
@@ -432,13 +401,7 @@ int main(int argc, char *argv[])
         fb_menu1(menu, fb);
         break;
       case ESC: // close menu
-        free(menu);
-        menu = NULL;
-        fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-        set_grid(grid, grid_page, fb);
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
-        STATE = CREATE;
+        menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
         break;
       default:
         continue;
@@ -465,33 +428,15 @@ int main(int argc, char *argv[])
         break;
       case X: // select
         if (menu->active == 0) {
-          free(menu);
-          menu = NULL;
-          fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-          set_grid(grid, grid_page, fb);
-          fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-            COLOR[WHITE], fb);
-          STATE = CREATE;
+          menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
           break;
         } else {
           play(led_mem_base, lcd_mem_base, grid, low, speed, fb);
-          free(menu);
-          menu = NULL;
-          fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-          set_grid(grid, grid_page, fb);
-          fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-            COLOR[WHITE], fb);
-          STATE = CREATE;
+          menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
         }
         break;
       case ESC: // close menu
-        free(menu);
-        menu = NULL;
-        fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
-        set_grid(grid, grid_page, fb);
-        fb_block(grid_active % BLKW, grid_active / BLKW, 1,
-          COLOR[WHITE], fb);
-        STATE = CREATE;
+        menu_close(menu, grid, grid_page, grid_active, &STATE, fb);
         break;
       default:
         continue;
@@ -501,6 +446,7 @@ int main(int argc, char *argv[])
     lcd_draw(lcd_mem_base, fb);
   }
 
+  // <3 screen and cleaning
   led_line_set(led_mem_base, 0x0);
   led_rgb_set(led_mem_base, COLOR[BLACK]);
   fb_fill(0, 0, fb->w, fb->h, COLOR[BLACK], fb);
