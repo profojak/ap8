@@ -10,10 +10,10 @@
 #include <string.h>
 
 typedef struct {
-  char **options;
-  char *rgb;
-  short size;
-  short active;
+  char **options; /* array with text of options */
+  char *rgb;      /* rgb */
+  short size;     /* size */
+  short active;   /* active option (knob value for 1-option menu) */
 } menu_t;
 
 menu_t *menu2_init(char *text1, char *text2, char *rgb);

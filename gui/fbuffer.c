@@ -25,7 +25,7 @@ fbuffer_t *fb_init(int w, int h)
   return fb;
 }
 
-/* move frame buffer 1 pixel up */
+/* move frame buffer 8 pixels up */
 void fb_up(fbuffer_t *fb) {
   int i, j;
   for (i = 0; i < fb->h + BLKH - 9; i++) {
