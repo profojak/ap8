@@ -4,9 +4,6 @@
 
 #define _POSIX_C_SOURCE 200112L
 
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "led.h"
 
 /* set LEDs on 32 LED line */

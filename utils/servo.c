@@ -6,8 +6,6 @@
 
 #include "servo.h"
 
-#include <stdio.h>
-
 static const int PWM[3][3] = {
   { 100000, 100000, 70000 },
   { 160000, 160000, 120000 },

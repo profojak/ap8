@@ -5,6 +5,7 @@
 #ifndef LED_H
 #define LED_H
 
+#include <stdlib.h>
 #include <stdint.h>
 
 #include "../mzapo/mzapo_regs.h"

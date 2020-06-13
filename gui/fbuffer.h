@@ -10,7 +10,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "../mzapo/mzapo_parlcd.h"
 #include "../fonts/font_types.h"
 #include "menu.h"
 

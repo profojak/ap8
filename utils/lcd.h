@@ -11,7 +11,6 @@
 #include <stdbool.h>
 
 #include "../mzapo/mzapo_parlcd.h"
-#include "../fonts/font_types.h"
 #include "../gui/fbuffer.h"
 
 void lcd_init(unsigned char *lcd_mem_base, unsigned int size);
